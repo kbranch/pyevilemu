@@ -8,6 +8,7 @@ def test_bgb32():
         e = list(find_gameboy_emulators())
         assert len(e) == 1
         assert e[0].read_rom(0x134, 16) == b'BGBWELCOME\x00\x00\x00\x00\x00\x00'
+        assert e[0].read_ram16(9) == 0x8001
 
 
 def test_bgb64():
@@ -16,3 +17,4 @@ def test_bgb64():
         e = list(find_gameboy_emulators())
         assert len(e) == 1
         assert e[0].read_rom(0x134, 16) == b'BGBWELCOME\x00\x00\x00\x00\x00\x00'
+        assert e[0].read_ram16(9) == 0x8001

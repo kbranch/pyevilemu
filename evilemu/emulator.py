@@ -30,7 +30,7 @@ class Emulator(abc.ABC):
         return int.from_bytes(self.read_rom(offset, 1), 'little')
 
     def read_ram8(self, offset) -> int:
-        return int.from_bytes(self.read_rom(offset, 1), 'little')
+        return int.from_bytes(self.read_ram(offset, 1), 'little')
 
     def write_rom8(self, offset: int, data: int) -> None:
         return self.write_rom(offset, data.to_bytes(1, 'little'))
@@ -42,7 +42,7 @@ class Emulator(abc.ABC):
         return int.from_bytes(self.read_rom(offset, 2), 'little')
 
     def read_ram16(self, offset) -> int:
-        return int.from_bytes(self.read_rom(offset, 2), 'little')
+        return int.from_bytes(self.read_ram(offset, 2), 'little')
 
     def write_rom16(self, offset: int, data: int) -> None:
         return self.write_rom(offset, data.to_bytes(2, 'little'))

@@ -6,7 +6,7 @@ from typing import Generator, Tuple, List
 class ProcessBase(abc.ABC):
     @staticmethod
     @abc.abstractmethod
-    def find_processes(executable_name: str) -> Generator["Process", None, None]:
+    def find_processes(executable_name: str) -> Generator["ProcessBase", None, None]:
         ...
 
     @abc.abstractmethod
@@ -43,7 +43,7 @@ class ProcessBase(abc.ABC):
             ptr = self.read_pointer64(ptr + offset)
         return ptr
 
-    def search(self, data: bytes, *, all_memory=False) -> Generator[int, None, None]:
+    def search(self, data: bytes, *, all_memory: bool = False) -> Generator[int, None, None]:
         """Search for all occurances of [data] in the memory of this process.
             By default only search the primary memory, which is quick and fast.
             Searching all memory allows you to find anything, but is inefficient and error prone.
@@ -60,7 +60,7 @@ class ProcessBase(abc.ABC):
                 yield start + idx
                 idx = mem.find(data, idx + 1)
 
-    def search_chunks(self, *data: Tuple[int, bytes], all_memory=False) -> Generator[int, None, None]:
+    def search_chunks(self, *data: Tuple[int, bytes], all_memory: bool = False) -> Generator[int, None, None]:
         """Search for all occurances of [offset, data] in the memory of this process.
             By default only search the primary memory, which is quick and fast.
             Searching all memory allows you to find anything, but is inefficient and error prone.

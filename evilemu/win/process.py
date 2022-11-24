@@ -8,10 +8,10 @@ class Process(evilemu.process.ProcessBase):
     @staticmethod
     def find_processes(executable_name: str) -> Generator["Process", None, None]:
         process_list = (ctypes.wintypes.DWORD * 2048)()
-        process_count = ctypes.wintypes.DWORD(0)
-        if not evilemu.win.nativeapi.EnumProcesses(process_list, ctypes.sizeof(process_list), process_count):
+        process_count_c = ctypes.wintypes.DWORD(0)
+        if not evilemu.win.nativeapi.EnumProcesses(process_list, ctypes.sizeof(process_list), process_count_c):
             raise ValueError("EnumProcesses failed")
-        process_count = min(2048, process_count.value // ctypes.sizeof(ctypes.wintypes.DWORD))
+        process_count = min(2048, process_count_c.value // ctypes.sizeof(ctypes.wintypes.DWORD))
         for n in range(process_count):
             access = evilemu.win.nativeapi.PROCESS_VM_READ | evilemu.win.nativeapi.PROCESS_QUERY_INFORMATION | evilemu.win.nativeapi.PROCESS_VM_WRITE | evilemu.win.nativeapi.PROCESS_VM_OPERATION
             proc = evilemu.win.nativeapi.OpenProcess(access, False, process_list[n])
@@ -27,7 +27,7 @@ class Process(evilemu.process.ProcessBase):
     def __init__(self, process_handle: ctypes.wintypes.HANDLE):
         self.__handle = process_handle
 
-    def __del__(self):
+    def __del__(self) -> None:
         evilemu.win.nativeapi.CloseHandle(self.__handle)
 
     def read_memory(self, addr: int, size: int) -> bytes:

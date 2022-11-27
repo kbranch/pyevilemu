@@ -1,10 +1,10 @@
 import ctypes.wintypes
 import evilemu.win.nativeapi
-import evilemu.process
+import evilemu.processbase
 from typing import Generator, Tuple
 
 
-class Process(evilemu.process.ProcessBase):
+class Process(evilemu.processbase.ProcessBase):
     @staticmethod
     def find_processes(executable_name: str) -> Generator["Process", None, None]:
         process_list = (ctypes.wintypes.DWORD * 2048)()

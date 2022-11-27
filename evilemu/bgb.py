@@ -1,5 +1,5 @@
 from evilemu.emulator import Emulator
-from evilemu.win.process import Process
+from evilemu.process import Process
 from typing import Generator
 
 

@@ -15,7 +15,8 @@ class SameBoy(Emulator):
                         # Offsets depend on the version of SameBoy
                         rom_address = process.read_pointer32(base_address + 33920)
                         ram_address = process.read_pointer32(base_address + 33944)
-                        yield SameBoy(process, rom_address, ram_address)
+                        hram_address = base_address + 33040 - 64
+                        yield SameBoy(process, rom_address, ram_address, hram_address)
                         break
             except IOError:
                 pass

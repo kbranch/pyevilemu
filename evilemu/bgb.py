@@ -12,8 +12,9 @@ class BGB32(Emulator):
                     main_address = process.read_pointer_chain32(base_address + 12, 0, 0, 0x34)
                     rom_address = process.read_pointer32(main_address + 0x10)
                     ram_address = process.read_pointer32(main_address + 0x108)
+                    hram_address = process.read_pointer32(main_address + 0x130)
                     if rom_address != 0 and ram_address != 0:
-                        yield BGB32(process, rom_address, ram_address)
+                        yield BGB32(process, rom_address, ram_address, hram_address)
             except IOError:
                 pass
 
@@ -33,7 +34,8 @@ class BGB64(Emulator):
                     main_address = process.read_pointer_chain64(base_address + offset, 0, 0x44)
                     rom_address = process.read_pointer64(main_address + 0x18)
                     ram_address = process.read_pointer64(main_address + 0x190)
-                    if rom_address != 0 and ram_address != 0:
-                        yield BGB64(process, rom_address, ram_address)
+                    hram_address = process.read_pointer64(main_address + 0x1D9)  # Not sure, this is unaligned, which is odd...
+                    if rom_address != 0 and ram_address != 0 and hram_address != 0:
+                        yield BGB64(process, rom_address, ram_address, hram_address)
             except IOError:
                 pass

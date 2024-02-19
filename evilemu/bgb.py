@@ -24,6 +24,20 @@ class BGB64(Emulator):
     def find_all() -> Generator[Emulator, None, None]:
         for process in Process.find_processes("bgb64.exe"):
             try:
+                version = 'unknown'
+
+                # One byte between the chunks varies with version
+                # Last chunk ends with 'bgb1.' to pinpoint the right spot, which is fragile but at least detects 1.5.x correctly
+                version_address = next(process.search_chunks(
+                    (0, b'\xE4\x04\x01\x00\xFF\xFF\xFF\xFF'),
+                    (9, b'\x00\x00\x00\x62\x67\x62\x31\x2E'),
+                ), False)
+
+                if version_address:
+                    # Should give us something like 'bgb1.5.11.w64'
+                    version_address += 12
+                    version = process.read_memory(version_address, 14).decode('utf-8', errors='ignore')
+
                 for base_address in process.search_chunks(
                     (0, b'\x48\x83\xec\x28\x48\x8b\x05'),
                     (11, b'\x48\x83\x38\x00\x74\x1a\x48\x8b\x05'),
@@ -34,12 +48,12 @@ class BGB64(Emulator):
                     main_address = process.read_pointer_chain64(base_address + offset, 0, 0x44)
                     rom_address = process.read_pointer64(main_address + 0x18)
                     ram_address = process.read_pointer64(main_address + 0x190)
-                    hram_address = process.read_pointer64(main_address + 0x1D9)  # Not sure, this is unaligned, which is odd...
 
-                    # BGB 1.6.1 changed this offset
-                    try:
-                        process.read_memory(hram_address, 1)
-                    except:
+                    if "bgb1.5." in version:
+                        # Tested with 1.5.10 and 1.5.11
+                        hram_address = process.read_pointer64(main_address + 0x1D9)  # Not sure, this is unaligned, which is odd...
+                    else:
+                        # Tested with 1.6 and 1.6.1
                         hram_address = process.read_pointer64(main_address + 0x2E9)
 
                     if rom_address != 0 and ram_address != 0 and hram_address != 0:

@@ -35,6 +35,13 @@ class BGB64(Emulator):
                     rom_address = process.read_pointer64(main_address + 0x18)
                     ram_address = process.read_pointer64(main_address + 0x190)
                     hram_address = process.read_pointer64(main_address + 0x1D9)  # Not sure, this is unaligned, which is odd...
+
+                    # BGB 1.6.1 changed this offset
+                    try:
+                        process.read_memory(hram_address, 1)
+                    except:
+                        hram_address = process.read_pointer64(main_address + 0x2E9)
+
                     if rom_address != 0 and ram_address != 0 and hram_address != 0:
                         yield BGB64(process, rom_address, ram_address, hram_address)
             except IOError:

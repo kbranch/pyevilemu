@@ -61,25 +61,38 @@ class BGB64(Emulator):
                     version_address += 12
                     version = process.read_memory(version_address, 14).decode('utf-8', errors='ignore')
 
-                for base_address in process.search_chunks(
-                    (0, b'\x48\x83\xec\x28\x48\x8b\x05'),
-                    (11, b'\x48\x83\x38\x00\x74\x1a\x48\x8b\x05'),
-                    (24, b'\x48\x8b\x00\x80\xb8'),
-                    (33, b'\x00\x74\x07'),
-                ):
-                    offset = process.read_pointer32(base_address + 20) + 24
-                    main_address = process.read_pointer_chain64(base_address + offset, 0, 0x44)
-                    rom_address = process.read_pointer64(main_address + 0x18)
-                    ram_address = process.read_pointer64(main_address + 0x190)
-
-                    if "bgb1.5." in version:
-                        # Tested with 1.5.10 and 1.5.11
-                        hram_address = process.read_pointer64(main_address + 0x1D9)  # Not sure, this is unaligned, which is odd...
-                    else:
-                        # Tested with 1.6 and 1.6.1
+                version_chunks = [int(x) for x in re.findall('(\d+)', version)]
+                if version_chunks[1] >= 6 and version_chunks[2] >= 4:
+                    #Tested with 1.6.4 and probably fragile - does not work on 1.6.3
+                    for base_address in process.search(b'\x48\x83\x38\x00\x74\x1a\x48\x8b\x05'):
+                        offset = process.read_pointer32(base_address + 9) + 24
+                        main_address = process.read_pointer_chain64(base_address + 11 + offset, 0) + 0x10D
+                        rom_address = process.read_pointer64(main_address + 0x18)
+                        ram_address = process.read_pointer64(main_address + 0x190)
                         hram_address = process.read_pointer64(main_address + 0x2E9)
 
-                    if rom_address != 0 and ram_address != 0 and hram_address != 0:
-                        yield BGB64(process, rom_address, ram_address, hram_address)
+                        if rom_address != 0 and ram_address != 0 and hram_address != 0:
+                            yield BGB64(process, rom_address, ram_address, hram_address)
+                else:
+                    for base_address in process.search_chunks(
+                        (0, b'\x48\x83\xec\x28\x48\x8b\x05'),
+                        (11, b'\x48\x83\x38\x00\x74\x1a\x48\x8b\x05'),
+                        (24, b'\x48\x8b\x00\x80\xb8'),
+                        (33, b'\x00\x74\x07'),
+                    ):
+                        offset = process.read_pointer32(base_address + 20) + 24
+                        main_address = process.read_pointer_chain64(base_address + offset, 0, 0x44)
+                        rom_address = process.read_pointer64(main_address + 0x18)
+                        ram_address = process.read_pointer64(main_address + 0x190)
+
+                        if "bgb1.5." in version:
+                            # Tested with 1.5.10 and 1.5.11
+                            hram_address = process.read_pointer64(main_address + 0x1D9)  # Not sure, this is unaligned, which is odd...
+                        else:
+                            # Tested with 1.6 and 1.6.1
+                            hram_address = process.read_pointer64(main_address + 0x2E9)
+
+                        if rom_address != 0 and ram_address != 0 and hram_address != 0:
+                            yield BGB64(process, rom_address, ram_address, hram_address)
             except IOError:
                 pass

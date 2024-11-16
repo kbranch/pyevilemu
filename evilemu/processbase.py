@@ -26,10 +26,18 @@ class ProcessBase(abc.ABC):
         ...
 
     def read_pointer32(self, addr: int) -> int:
-        return int.from_bytes(self.read_memory(addr, 4), byteorder=sys.byteorder)
+        pointer = bytes()
+        for i in range(4):
+            pointer += self.read_memory(addr + i, 1)
+
+        return int.from_bytes(pointer, byteorder=sys.byteorder)
 
     def read_pointer64(self, addr: int) -> int:
-        return int.from_bytes(self.read_memory(addr, 8), byteorder=sys.byteorder)
+        pointer = bytes()
+        for i in range(8):
+            pointer += self.read_memory(addr + i, 1)
+
+        return int.from_bytes(pointer, byteorder=sys.byteorder)
 
     def read_pointer_chain32(self, addr: int, *offsets: int) -> int:
         ptr = self.read_pointer32(addr)

@@ -62,11 +62,11 @@ class BGB64(Emulator):
                     version = process.read_memory(version_address, 14).decode('utf-8', errors='ignore')
 
                 version_chunks = [int(x) for x in re.findall('(\d+)', version)]
-                if version_chunks[1] >= 6 and version_chunks[2] >= 4:
-                    #Tested with 1.6.4 and probably fragile - does not work on 1.6.3
+                if version_chunks[1] >= 6 and version_chunks[2] >= 1:
+                    #Tested with 1.6.1-4
                     for base_address in process.search(b'\x48\x83\x38\x00\x74\x1a\x48\x8b\x05'):
                         offset = process.read_pointer32(base_address + 9) + 24
-                        main_address = process.read_pointer_chain64(base_address + 11 + offset, 0) + 0x10D
+                        main_address = process.read_pointer_chain64(base_address - 11 + offset, 0) + 0x10D
                         rom_address = process.read_pointer64(main_address + 0x18)
                         ram_address = process.read_pointer64(main_address + 0x190)
                         hram_address = process.read_pointer64(main_address + 0x2E9)
